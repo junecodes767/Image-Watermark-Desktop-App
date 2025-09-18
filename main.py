@@ -32,25 +32,12 @@ def image_to_wtrmark():
     
     
 root = TkinterDnD.Tk()
-root.geometry("400x600")
-title = Label(root,text="Insert your image here").pack()
-
-img = tk.Entry(root)
-img.insert(1,"Please Enter your Image here:")
-img.pack()
-img_bttn = tk.Button(width=5,text="Enter").pack()
-
-watermark_txt_label = tk.Label(text="Enter the text to turn into watermark below").pack()
-watermark_txt = tk.Entry(root).pack(pady=10)
-watermark_txt_bttn = tk.Button(width=5,text="Enter").pack()
-
-# Define what happens on drop
-def drop(event):
-    img.insert(tk.END, event.data)  # Add dropped file
-    
-img.drop_target_register(DND_FILES)
-img.dnd_bind('<<Drop>>',drop)
+root.geometry("1440x1024")
 
 
+"""Labels"""
+
+
+"""Buttons"""
 
 root.mainloop()
