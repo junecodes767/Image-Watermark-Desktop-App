@@ -5,11 +5,23 @@ from tkinter import filedialog
 import customtkinter
   
 FILE_NAME = None
-pil_image = None
+original_image = None
+scaled_photo= None
 tk_image = None
+CANVAS_W, CANVAS_H = 700, 500 # canvas dimensions
+
+
+def scale_image(img, max_w, max_h):
+    """Return a scaled copy of img that fits inside max_w × max_h."""
+    img_w, img_h = img.size
+    scale = min(max_w / img_w, max_h / img_h)  # scaling factor
+    new_w = int(img_w * scale)
+    new_h = int(img_h * scale)
+    return img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
 
 def choose_image():
-    global FILE_NAME,pil_image,tk_image
+    global FILE_NAME,pil_image,tk_image,scaled_photo
     FILE_NAME = filedialog.askopenfilename(initialdir = "/",
                                           title = "Select Your Image File",
                                           filetypes = (("PNG Files","*.png*"),
@@ -17,10 +29,12 @@ def choose_image():
                                                         ))
     if FILE_NAME:
         original_image = Image.open(FILE_NAME)
-        pil_image = original_image.resize((400, 400), Image.Resampling.LANCZOS)
-
-        tk_image = ImageTk.PhotoImage(pil_image)
-        canvas.create_image(100, 100, image=tk_image, anchor=tk.CENTER)
+        # pil_image = original_image.resize((400, 400), Image.Resampling.LANCZOS)
+        #scale image
+        scaled_photo =scale_image(original_image,CANVAS_W,CANVAS_H)
+        
+        tk_image = ImageTk.PhotoImage(scaled_photo)
+        canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)
 
 
 
@@ -73,7 +87,7 @@ fontsize_scale= Scale( root, variable = font_size_value,
            orient = HORIZONTAL).place(x=860, y=540)
 
 #canvas
-canvas = tk.Canvas(root, width=700, height=500, bg="Grey")
+canvas = tk.Canvas(root, width=CANVAS_W, height=CANVAS_H, bg="Grey")
 canvas.place(x=50,y=40)
 # Optional: Resize the image
 # canvas.create_image(200, 150, image=tk_image, anchor=tk.CENTER)
