@@ -21,7 +21,7 @@ def scale_image(img, max_w, max_h):
 
 
 def choose_image():
-    global FILE_NAME,pil_image,tk_image,scaled_photo
+    global FILE_NAME,pil_image,tk_image,scaled_photo,original_image
     FILE_NAME = filedialog.askopenfilename(initialdir = "/",
                                           title = "Select Your Image File",
                                           filetypes = (("PNG Files","*.png*"),
@@ -39,18 +39,19 @@ def choose_image():
 def text_on_image():
     """attaches the text unto the image as a watermark"""
     global original_image,WATERMARK_TEXT
-    draw = ImageDraw.Draw(original_image)
+    img = original_image.copy()
+    draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("arial.ttf", 40)
     position = (50, 50) # Adjust coordinates as needed
     fill_color = (255, 0, 0) # Red color
 
     draw.text(position, WATERMARK_TEXT, font=font, fill=fill_color)
-    watermarked_image = original_image
+    watermarked_image = img
     scaled_photo =scale_image(watermarked_image,CANVAS_W,CANVAS_H)
         
     tk_image = ImageTk.PhotoImage(scaled_photo)
     canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)
-    
+    canvas.image = tk_image
 
 
 
@@ -60,19 +61,35 @@ def image_or_text():
         open_new_window()
     else:
         pass
-    
 
+  
 def open_new_window():
-    new_window = Toplevel(root)  # Create a new window
     global WATERMARK_TEXT
+    new_window = Toplevel(root) 
     new_window.title("Enter Text")
     new_window.geometry("400x150")  
+    watermark_text = tk.StringVar()
+    def submit_text():
+        global WATERMARK_TEXT
+        WATERMARK_TEXT = watermark_text.get()
+        if WATERMARK_TEXT:  # only if user entered something
+            text_on_image()
+        else:
+            print("still none")
+     # Create a new window
     
     customtkinter.CTkLabel(new_window, text="Enter Text to Attach To Image:", font=("Inter",20)).place(x=10,y=50)
-    customtkinter.CTkButton(new_window, text ="Enter", command =text_on_image).place(x=250,y=90)
-    watermark_text = tk.StringVar()
+    
     customtkinter.CTkEntry(new_window, textvariable=watermark_text,width=200).place(x=10,y=90)
-    WATERMARK_TEXT =watermark_text.get()
+    # if watermark_text.get() not in ['',None]:
+       
+    enter_btn = customtkinter.CTkButton(new_window, text ="Enter", command =submit_text)
+    enter_btn.place(x=250,y=90)
+    # enter_btn.bind('<Button-1>',record_text)
+        
+        
+        
+        
      # close window on when the button is clicked
 
            
