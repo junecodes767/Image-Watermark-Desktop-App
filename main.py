@@ -74,7 +74,11 @@ def get_fontsize(value):
     
 def modify_image():
     """Update image when user changes different features"""
-    text_on_image()
+    global WATERMARK_TEXT
+    if WATERMARK_TEXT != None:
+        text_on_image()
+    else:
+        overlay_image()
     
 def image_or_text():
     global radio_btn,OVERLAY_IMAGE,original_image, CANVAS_H, CANVAS_W,OPACITY
@@ -92,30 +96,34 @@ def image_or_text():
                     )
         
         if OVERLAY_IMAGE:
-            background = original_image.copy()
-            #get the user image
-                #open image using pillow
-            overlay = Image.open(OVERLAY_IMAGE)
-            overlay.putalpha(OPACITY)
-            width, height = background.size
-            ov_w, ov_h = overlay.size
-            x = (width - ov_w) // 2
-            y = (height - ov_h) // 2
-            # Ensure the overlay image has an alpha channel if transparency is desired
-            if overlay.mode != 'RGBA':
-                overlay = overlay.convert('RGBA')
-            position = (x,y)
-            # Paste the overlay image onto the background
-            # The 'mask' argument is used for handling transparency in the overlay image
-            altered_photo = background.paste(overlay, position,overlay) # this is the alter image
-            
-            scaled_photo =scale_image(background,CANVAS_W,CANVAS_H) # scale the photo for the canvas
-            
-            tk_image = ImageTk.PhotoImage(scaled_photo) # turn the photo to a tkimage. This is reable by tkinter it gives a photo image object
-            canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)  
-            canvas.image = tk_image
-       
+           overlay_image()
   
+def overlay_image ():
+    global radio_btn,OVERLAY_IMAGE,original_image, CANVAS_H, CANVAS_W,OPACITY
+
+    background = original_image.copy()
+    #get the user image
+        #open image using pillow
+    overlay = Image.open(OVERLAY_IMAGE)
+    overlay.putalpha(OPACITY)
+    width, height = background.size
+    ov_w, ov_h = overlay.size
+    x = (width - ov_w) // 2
+    y = (height - ov_h) // 2
+    # Ensure the overlay image has an alpha channel if transparency is desired
+    if overlay.mode != 'RGBA':
+        overlay = overlay.convert('RGBA')
+    position = (x,y)
+    # Paste the overlay image onto the background
+    # The 'mask' argument is used for handling transparency in the overlay image
+    background.paste(overlay, position,overlay) # this is the alter image
+    
+    scaled_photo =scale_image(background,CANVAS_W,CANVAS_H) # scale the photo for the canvas
+    
+    tk_image = ImageTk.PhotoImage(scaled_photo) # turn the photo to a tkimage. This is reable by tkinter it gives a photo image object
+    canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)  
+    canvas.image = tk_image
+       
 def open_new_window():
     global WATERMARK_TEXT
     new_window = Toplevel(root) 
@@ -187,15 +195,30 @@ green_color = customtkinter.CTkRadioButton(root, text="Green", variable=color_bt
 x_var=tk.StringVar()
 
 #opacity radio buttons
-def change_image_opacity(value):
+def change_image_opacity():
+    value =  opacity_value.get()
+    print(value)
+    global OPACITY
+    if value =="25%":
+        OPACITY=38
+        print(OPACITY)
+    if value =="50%":
+        OPACITY =128
+        print(OPACITY)
+    if value =="75%":
+        OPACITY=191
+        print(OPACITY)
+    if value == "100%":
+        OPACITY=255
+        print(OPACITY)
+        
     
-    pass
 opacity_value = tk.StringVar()
 opacity_values = ["25%","50%","75%","100%"]
 x = 870
 y = 560
 for value in opacity_values:
-    customtkinter.CTkRadioButton(root,text=value,variable=opacity_value, command=change_image_opacity).place(x=x,y=y)
+    customtkinter.CTkRadioButton(root,text=value,variable=opacity_value, value =value, command=change_image_opacity).place(x=x,y=y)
     x +=80
 
 # Entry
