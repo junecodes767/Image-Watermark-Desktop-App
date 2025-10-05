@@ -10,6 +10,10 @@ scaled_photo= None
 tk_image = None
 CANVAS_W, CANVAS_H = 700, 500 # canvas dimensions
 WATERMARK_TEXT = None
+FONT_SIZE = 40
+FONT_COLOR = "black"
+OVERLAY_IMAGE = None
+OPACITY = 128
 
 def scale_image(img, max_w, max_h):
     """Return a scaled copy of img that fits inside max_w × max_h."""
@@ -22,11 +26,14 @@ def scale_image(img, max_w, max_h):
 
 def choose_image():
     global FILE_NAME,pil_image,tk_image,scaled_photo,original_image
-    FILE_NAME = filedialog.askopenfilename(initialdir = "/",
-                                          title = "Select Your Image File",
-                                          filetypes = (("PNG Files","*.png*"),
-                                                       ("JPEG Files","*.jpg*")
-                                                        ))
+    FILE_NAME = filedialog.askopenfilename(
+    initialdir="/",
+    title="Select Your Image File",
+    filetypes=(
+        ("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff"),
+        ("All Files", "*.*")
+    )
+    )
     if FILE_NAME:
         original_image = Image.open(FILE_NAME)
         # pil_image = original_image.resize((400, 400), Image.Resampling.LANCZOS)
@@ -38,14 +45,21 @@ def choose_image():
 
 def text_on_image():
     """attaches the text unto the image as a watermark"""
-    global original_image,WATERMARK_TEXT
+    global original_image,WATERMARK_TEXT ,FONT_SIZE,FONT_COLOR
     img = original_image.copy()
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("arial.ttf", 40)
-    position = (50, 50) # Adjust coordinates as needed
-    fill_color = (255, 0, 0) # Red color
+    font = ImageFont.truetype("arial.ttf", FONT_SIZE)
+    width, height = original_image.size
+    bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+
+    position = ((width - text_w) / 2, (height - text_h) / 2)# Adjust coordinates as needed
+    fill_color = FONT_COLOR # Red color
+    
 
     draw.text(position, WATERMARK_TEXT, font=font, fill=fill_color)
+    # rotate_text = draw.rotate(45, expand=True, fillcolor=(0,0,0,0))
     watermarked_image = img
     scaled_photo =scale_image(watermarked_image,CANVAS_W,CANVAS_H)
         
@@ -53,15 +67,54 @@ def text_on_image():
     canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)
     canvas.image = tk_image
 
-
-
+def get_fontsize(value):
+    global FONT_SIZE
+    FONT_SIZE = int(float(value)) * 5
+    
+    
+def modify_image():
+    """Update image when user changes different features"""
+    text_on_image()
+    
 def image_or_text():
-    global radio_btn
+    global radio_btn,OVERLAY_IMAGE,original_image, CANVAS_H, CANVAS_W,OPACITY
     if radio_btn.get() == "text":
         open_new_window()
     else:
-        pass
-
+        
+        OVERLAY_IMAGE = filedialog.askopenfilename(
+                        initialdir="/",
+                        title="Select Your Image File",
+                        filetypes=(
+                            ("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff"),
+                            ("All Files", "*.*")
+                        )
+                    )
+        
+        if OVERLAY_IMAGE:
+            background = original_image.copy()
+            #get the user image
+                #open image using pillow
+            overlay = Image.open(OVERLAY_IMAGE)
+            overlay.putalpha(OPACITY)
+            width, height = background.size
+            ov_w, ov_h = overlay.size
+            x = (width - ov_w) // 2
+            y = (height - ov_h) // 2
+            # Ensure the overlay image has an alpha channel if transparency is desired
+            if overlay.mode != 'RGBA':
+                overlay = overlay.convert('RGBA')
+            position = (x,y)
+            # Paste the overlay image onto the background
+            # The 'mask' argument is used for handling transparency in the overlay image
+            altered_photo = background.paste(overlay, position,overlay) # this is the alter image
+            
+            scaled_photo =scale_image(background,CANVAS_W,CANVAS_H) # scale the photo for the canvas
+            
+            tk_image = ImageTk.PhotoImage(scaled_photo) # turn the photo to a tkimage. This is reable by tkinter it gives a photo image object
+            canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)  
+            canvas.image = tk_image
+       
   
 def open_new_window():
     global WATERMARK_TEXT
@@ -92,7 +145,10 @@ def open_new_window():
         
      # close window on when the button is clicked
 
-           
+def change_font_color():
+    global FONT_COLOR
+    FONT_COLOR = color_btn.get() 
+    print("Font color changed to:", FONT_COLOR) 
 root = tk.Tk()
 
 
@@ -104,42 +160,57 @@ watermark_label_title= tk.Label(root, text="Watermark")
 
 watermark_label = tk.Label(root, text="Watermark", font=("Inter",24)).place(x=850,y=10)
 #labels
-x_label = tk.Label(root, text="x:", font=("Inter",24)).place(x=850,y=300 )
-y_label = tk.Label(root, text="y:" , font=("Inter",24)).place(x=850,y=350 )
+# x_label = tk.Label(root, text="x:", font=("Inter",24)).place(x=850,y=300 )
+# y_label = tk.Label(root, text="y:" , font=("Inter",24)).place(x=850,y=350 )
 opacity = tk.Label(root, text="Opacity" , font=("Inter",24)).place(x=850,y=498)
 font_size = tk.Label(root, text="Font Size", font=("Inter",24)).place(x=850,y=400 )
-position = tk.Label(root, text="Position", font=("Inter",24)).place(x=850,y=260 )
+position = tk.Label(root, text="Color", font=("Inter",24)).place(x=850,y=260 )
 
 
 #buttons
 addImage_btn = customtkinter.CTkButton(root, text="Add Image", width=200 , height=40, corner_radius=40, command=choose_image).place( y= 600, x=280)
 saveImage_btn = customtkinter.CTkButton(root, text="Save Image", corner_radius=40, width=200, height=40,  fg_color="#F20E0E").place(x=880, y=630)
-modifyImage_btn= customtkinter.CTkButton(root, text="Modify Image", corner_radius=40, width=200, height=40).place(x=1130, y=630)
+modifyImage_btn= customtkinter.CTkButton(root, text="Modify Image", corner_radius=40, width=200, height=40,command=modify_image).place(x=1130, y=630)
 enter_btn = customtkinter.CTkButton(root, text="Enter", width=200 , height=40, corner_radius=40,command=image_or_text).place(x=970, y= 200)
 
 #radio button
 radio_btn = tk.StringVar()
 watermark_text_input = customtkinter.CTkRadioButton(root, text="Text", variable=radio_btn,font=("Inter",15),value ="text").place(x=850, y=100)
 watermark_image_input= customtkinter.CTkRadioButton(root, text="Image", variable=radio_btn,font=("Inter",15),value ="image").place(x=1200, y=100)
+color_btn = tk.StringVar()
+# red_color = customtkinter.CTkRadioButton(root, text="Red", variable=color_btn,font=("Inter",15),value ="red").place(x=1050, y=320)
+blue_color = customtkinter.CTkRadioButton(root, text="Blue", variable=color_btn,font=("Inter",15),value ="blue",command=change_font_color).place(x=870, y=320)
+black_color = customtkinter.CTkRadioButton(root, text="Black", variable=color_btn,font=("Inter",15),value ="black", command=change_font_color).place(x=950, y=320)
+white_color = customtkinter.CTkRadioButton(root, text="White", variable=color_btn,font=("Inter",15),value ="white", command=change_font_color).place(x=1030, y=320)
+green_color = customtkinter.CTkRadioButton(root, text="Green", variable=color_btn,font=("Inter",15),value ="green", command= change_font_color).place(x=1120, y=320)
 
 x_var=tk.StringVar()
 
+#opacity radio buttons
+def change_image_opacity(value):
+    
+    pass
+opacity_value = tk.StringVar()
+opacity_values = ["25%","50%","75%","100%"]
+x = 870
+y = 560
+for value in opacity_values:
+    customtkinter.CTkRadioButton(root,text=value,variable=opacity_value, command=change_image_opacity).place(x=x,y=y)
+    x +=80
+
 # Entry
-x_entry = tk.Entry(root, textvariable = x_var, font = ('calibre',10,'normal')).place(x=890,y=315)
-y_entry = tk.Entry(root, textvariable = x_var, font = ('calibre',10,'normal')).place(x=890,y=365)
+# x_entry = tk.Entry(root, textvariable = x_var, font = ('calibre',10,'normal')).place(x=890,y=315)
+# y_entry = tk.Entry(root, textvariable = x_var, font = ('calibre',10,'normal')).place(x=890,y=365)
 
 
 #sliders
-font_size_value = tk.DoubleVar()
-opacity_value = tk.DoubleVar()
+font_size_value = tk.StringVar()
 
 # Create the slider
-opacity_scale= Scale( root, variable = opacity_value, 
-           from_ = 1, to = 100, 
-           orient = HORIZONTAL).place(x=860, y=440)
-fontsize_scale= Scale( root, variable = font_size_value, 
-           from_ = 1, to = 100, 
-           orient = HORIZONTAL).place(x=860, y=540)
+
+fontsize_scale= Scale( root,from_ = 1, to = 100, 
+           orient = HORIZONTAL,  command=get_fontsize)
+fontsize_scale.place(x=860, y=440)
 
 #canvas
 canvas = customtkinter.CTkCanvas(root, width=CANVAS_W, height=CANVAS_H, bg="Grey")
