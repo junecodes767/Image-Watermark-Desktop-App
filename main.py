@@ -14,6 +14,7 @@ FONT_SIZE = 40
 FONT_COLOR = "black"
 OVERLAY_IMAGE = None
 OPACITY = 128
+WATERMARKED_IMAGE = None
 
 def scale_image(img, max_w, max_h):
     """Return a scaled copy of img that fits inside max_w × max_h."""
@@ -45,7 +46,7 @@ def choose_image():
 
 def text_on_image():
     """attaches the text unto the image as a watermark"""
-    global original_image,WATERMARK_TEXT ,FONT_SIZE,FONT_COLOR
+    global original_image,WATERMARK_TEXT ,FONT_SIZE,FONT_COLOR, WATERMARKED_IMAGE
     img = original_image.copy()
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("arial.ttf", FONT_SIZE)
@@ -61,8 +62,9 @@ def text_on_image():
     draw.text(position, WATERMARK_TEXT, font=font, fill=fill_color)
     # rotate_text = draw.rotate(45, expand=True, fillcolor=(0,0,0,0))
     watermarked_image = img
+    WATERMARKED_IMAGE = watermarked_image
     scaled_photo =scale_image(watermarked_image,CANVAS_W,CANVAS_H)
-        
+    
     tk_image = ImageTk.PhotoImage(scaled_photo)
     canvas.create_image(CANVAS_W/2, CANVAS_H/2, image=tk_image, anchor=tk.CENTER)
     canvas.image = tk_image
@@ -99,7 +101,7 @@ def image_or_text():
            overlay_image()
   
 def overlay_image ():
-    global radio_btn,OVERLAY_IMAGE,original_image, CANVAS_H, CANVAS_W,OPACITY
+    global radio_btn,OVERLAY_IMAGE,original_image, CANVAS_H, CANVAS_W,WATERMARKED_IMAGE
 
     background = original_image.copy()
     #get the user image
@@ -117,7 +119,7 @@ def overlay_image ():
     # Paste the overlay image onto the background
     # The 'mask' argument is used for handling transparency in the overlay image
     background.paste(overlay, position,overlay) # this is the alter image
-    
+    WATERMARKED_IMAGE = background
     scaled_photo =scale_image(background,CANVAS_W,CANVAS_H) # scale the photo for the canvas
     
     tk_image = ImageTk.PhotoImage(scaled_photo) # turn the photo to a tkimage. This is reable by tkinter it gives a photo image object
@@ -151,7 +153,13 @@ def open_new_window():
         
         
         
-     # close window on when the button is clicked
+def save_image():
+    global FILE_NAME, WATERMARKED_IMAGE
+    
+    if WATERMARKED_IMAGE != None:
+        WATERMARKED_IMAGE.save("C:/Users/Admin/Downloads/edited_image.png")
+        print("Image Saved")
+    
 
 def change_font_color():
     global FONT_COLOR
@@ -177,7 +185,7 @@ position = tk.Label(root, text="Color", font=("Inter",24)).place(x=850,y=260 )
 
 #buttons
 addImage_btn = customtkinter.CTkButton(root, text="Add Image", width=200 , height=40, corner_radius=40, command=choose_image).place( y= 600, x=280)
-saveImage_btn = customtkinter.CTkButton(root, text="Save Image", corner_radius=40, width=200, height=40,  fg_color="#F20E0E").place(x=880, y=630)
+saveImage_btn = customtkinter.CTkButton(root, text="Save Image", corner_radius=40, width=200, height=40,  fg_color="#F20E0E",command=save_image).place(x=880, y=630)
 modifyImage_btn= customtkinter.CTkButton(root, text="Modify Image", corner_radius=40, width=200, height=40,command=modify_image).place(x=1130, y=630)
 enter_btn = customtkinter.CTkButton(root, text="Enter", width=200 , height=40, corner_radius=40,command=image_or_text).place(x=970, y= 200)
 
