@@ -3,7 +3,8 @@ from tkinter import Scale,HORIZONTAL,Toplevel,Canvas
 import tkinter as tk
 from tkinter import filedialog
 import customtkinter
-  
+from pathlib import Path
+
 FILE_NAME = None
 original_image = None
 scaled_photo= None
@@ -155,9 +156,13 @@ def open_new_window():
         
 def save_image():
     global FILE_NAME, WATERMARKED_IMAGE
-    
+    # Define directory and file names
+    folder_name = "Edited_Photos"
+    file_name = "edited_image.png"
+    file_path = Path.cwd() / folder_name / file_name
+    file_path.parent.mkdir(parents=True, exist_ok=True)
     if WATERMARKED_IMAGE != None:
-        WATERMARKED_IMAGE.save("C:/Users/Admin/Downloads/edited_image.png")
+        WATERMARKED_IMAGE.save(file_path)
         print("Image Saved")
     
 
