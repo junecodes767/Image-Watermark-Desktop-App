@@ -196,14 +196,14 @@ enter_btn = customtkinter.CTkButton(root, text="Enter", width=200 , height=40, c
 
 #radio button
 radio_btn = tk.StringVar()
-watermark_text_input = customtkinter.CTkRadioButton(root, text="Text", variable=radio_btn,font=("Inter",15),value ="text").place(x=850, y=100)
-watermark_image_input= customtkinter.CTkRadioButton(root, text="Image", variable=radio_btn,font=("Inter",15),value ="image").place(x=1200, y=100)
+watermark_text_input = customtkinter.CTkRadioButton(root, text="Text", variable=radio_btn,font=("Inter",15),value ="text",text_color=FONT_COLOR).place(x=850, y=100)
+watermark_image_input= customtkinter.CTkRadioButton(root, text="Image", variable=radio_btn,font=("Inter",15),value ="image",text_color=FONT_COLOR).place(x=1200, y=100)
 color_btn = tk.StringVar()
 # red_color = customtkinter.CTkRadioButton(root, text="Red", variable=color_btn,font=("Inter",15),value ="red").place(x=1050, y=320)
-blue_color = customtkinter.CTkRadioButton(root, text="Blue", variable=color_btn,font=("Inter",15),value ="blue",command=change_font_color).place(x=870, y=320)
-black_color = customtkinter.CTkRadioButton(root, text="Black", variable=color_btn,font=("Inter",15),value ="black", command=change_font_color).place(x=950, y=320)
-white_color = customtkinter.CTkRadioButton(root, text="White", variable=color_btn,font=("Inter",15),value ="white", command=change_font_color).place(x=1030, y=320)
-green_color = customtkinter.CTkRadioButton(root, text="Green", variable=color_btn,font=("Inter",15),value ="green", command= change_font_color).place(x=1120, y=320)
+blue_color = customtkinter.CTkRadioButton(root, text="Blue", variable=color_btn,font=("Inter",15),value ="blue",command=change_font_color,text_color=FONT_COLOR).place(x=870, y=320)
+black_color = customtkinter.CTkRadioButton(root, text="Black", variable=color_btn,font=("Inter",15),value ="black", command=change_font_color,text_color=FONT_COLOR).place(x=950, y=320)
+white_color = customtkinter.CTkRadioButton(root, text="White", variable=color_btn,font=("Inter",15),value ="white", command=change_font_color,text_color=FONT_COLOR).place(x=1030, y=320)
+green_color = customtkinter.CTkRadioButton(root, text="Green", variable=color_btn,font=("Inter",15),value ="green", command= change_font_color,text_color=FONT_COLOR).place(x=1120, y=320)
 
 x_var=tk.StringVar()
 
@@ -231,7 +231,7 @@ opacity_values = ["25%","50%","75%","100%"]
 x = 870
 y = 560
 for value in opacity_values:
-    customtkinter.CTkRadioButton(root,text=value,variable=opacity_value, value =value, command=change_image_opacity).place(x=x,y=y)
+    customtkinter.CTkRadioButton(root,text=value,variable=opacity_value, value =value, command=change_image_opacity,text_color=FONT_COLOR).place(x=x,y=y)
     x +=80
 
 # Entry
